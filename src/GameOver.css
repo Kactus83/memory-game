@@ -1,0 +1,9 @@
+.game-over {
+    margin: 20px 0;
+    color: #e74c3c;
+}
+
+.game-over h2 {
+    font-size: 24px;
+    font-weight: 700;
+}
