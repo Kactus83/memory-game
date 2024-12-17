@@ -5,7 +5,12 @@ import Card from './Card';
 import Controls from './Controls';
 import GameOver from './GameOver';
 
-// Fonction pour mélanger un tableau de cartes
+/**
+ * Fonction pour mélanger un tableau de cartes.
+ *
+ * @param {Array} array - Le tableau de cartes à mélanger.
+ * @returns {Array} Le tableau mélangé.
+ */
 function shuffleCards(array) {
     const shuffledArray = array.slice();
     for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -15,19 +20,32 @@ function shuffleCards(array) {
     return shuffledArray;
 }
 
-// Fonction pour générer le jeu de cartes initial
-function generateInitialCards() {
-    const values = ['🍎', '🍌', '🍇', '🍉', '🍓', '🍑', '🥝', '🍍'];
+/**
+ * Fonction pour générer le jeu de cartes initial.
+ *
+ * @param {Array} [values] - Les valeurs des cartes (optionnel pour les tests).
+ * @returns {Array} Le jeu de cartes initial.
+ */
+function generateInitialCards(values) {
+    const defaultValues = ['🍎', '🍌', '🍇', '🍉', '🍓', '🍑', '🥝', '🍍'];
+    const cardValues = values || defaultValues;
     let id = 1;
-    const cards = values.flatMap(value => [
+    const cards = cardValues.flatMap(value => [
         { id: id++, value, isFlipped: false, isMatched: false },
         { id: id++, value, isFlipped: false, isMatched: false }
     ]);
     return shuffleCards(cards);
 }
 
-function MemoryGame() {
-    const [cards, setCards] = useState(generateInitialCards());
+/**
+ * Composant principal du jeu de Memory.
+ *
+ * @param {Object} props - Les propriétés du composant.
+ * @param {Array} [props.initialCards] - Le jeu de cartes initial (optionnel pour les tests).
+ * @returns {JSX.Element} Le rendu du jeu de Memory.
+ */
+function MemoryGame({ initialCards }) {
+    const [cards, setCards] = useState(generateInitialCards(initialCards));
     const [firstCard, setFirstCard] = useState(null);
     const [secondCard, setSecondCard] = useState(null);
     const [disabled, setDisabled] = useState(false);
@@ -47,10 +65,13 @@ function MemoryGame() {
         }
     }, [timer, gameOverMessage]);
 
-    // Gestion du clic sur une carte
+    /**
+     * Gestion du clic sur une carte.
+     *
+     * @param {number} index - L'index de la carte cliquée.
+     */
     function handleCardClick(index) {
-
-        // Sécurité pour eviter les clics hors d'une partie
+        // Sécurité pour éviter les clics hors d'une partie
         if (disabled || gameOverMessage) return;
 
         const newCards = [...cards];
@@ -81,8 +102,8 @@ function MemoryGame() {
                 resetTurn();
                 // Si elles ne correspondent pas
             } else {
-                // Animation d'echec de matching 1 sec
-                setTimeout(() => {
+                // Animation d'échec de matching 1 sec
+                const timeoutId = setTimeout(() => {
                     setCards(prevCards =>
                         prevCards.map(card =>
                             card.id === firstCard.id || card.id === secondCard.id
@@ -92,6 +113,9 @@ function MemoryGame() {
                     );
                     resetTurn();
                 }, 1000);
+
+                // Nettoyage du timeout en cas de démontage du composant
+                return () => clearTimeout(timeoutId);
             }
         }
     }, [firstCard, secondCard]);
@@ -104,16 +128,20 @@ function MemoryGame() {
         }
     }, [matchedPairs, totalPairs]);
 
-    // Réinitialisation des cartes et du tour
+    /**
+     * Réinitialisation des cartes et du tour.
+     */
     function resetTurn() {
         setFirstCard(null);
         setSecondCard(null);
         setDisabled(false);
     }
 
-    // Réinitialisation complète du jeu
+    /**
+     * Réinitialisation complète du jeu.
+     */
     function resetGame() {
-        setCards(generateInitialCards());
+        setCards(generateInitialCards(initialCards));
         setFirstCard(null);
         setSecondCard(null);
         setMatchedPairs(0);
@@ -127,7 +155,7 @@ function MemoryGame() {
             <h1>Jeu de Memory</h1>
             <Controls timer={timer} resetGame={resetGame} matchedPairs={matchedPairs} totalPairs={totalPairs} />
             {gameOverMessage && <GameOver message={gameOverMessage} />}
-            <div className="grid">
+            <div className="grid" role="grid">
                 {cards.map((card, index) => (
                     <Card key={card.id} card={card} onClick={() => handleCardClick(index)} />
                 ))}
