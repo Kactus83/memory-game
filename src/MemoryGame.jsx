@@ -5,12 +5,6 @@ import Card from './Card';
 import Controls from './Controls';
 import GameOver from './GameOver';
 
-/**
- * Fonction pour mélanger un tableau de cartes.
- *
- * @param {Array} array - Le tableau de cartes à mélanger.
- * @returns {Array} Le tableau mélangé.
- */
 function shuffleCards(array) {
     const shuffledArray = array.slice();
     for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -20,12 +14,6 @@ function shuffleCards(array) {
     return shuffledArray;
 }
 
-/**
- * Fonction pour générer le jeu de cartes initial.
- *
- * @param {Array} [values] - Les valeurs des cartes (optionnel pour les tests).
- * @returns {Array} Le jeu de cartes initial.
- */
 function generateInitialCards(values) {
     const defaultValues = ['🍎', '🍌', '🍇', '🍉', '🍓', '🍑', '🥝', '🍍'];
     const cardValues = values || defaultValues;
@@ -45,7 +33,11 @@ function generateInitialCards(values) {
  * @returns {JSX.Element} Le rendu du jeu de Memory.
  */
 function MemoryGame({ initialCards }) {
-    const [cards, setCards] = useState(generateInitialCards(initialCards));
+    // Si initialCards est fourni, on l'utilise tel quel, sinon on génère le jeu par défaut
+    const [cards, setCards] = useState(() => {
+        return initialCards ? shuffleCards(initialCards) : generateInitialCards();
+    });
+
     const [firstCard, setFirstCard] = useState(null);
     const [secondCard, setSecondCard] = useState(null);
     const [disabled, setDisabled] = useState(false);
@@ -54,7 +46,6 @@ function MemoryGame({ initialCards }) {
     const [gameOverMessage, setGameOverMessage] = useState('');
     const totalPairs = cards.length / 2;
 
-    // Compte à rebours pour le temps restant
     useEffect(() => {
         if (timer > 0 && !gameOverMessage) {
             const timerId = setInterval(() => setTimer(prev => prev - 1), 1000);
@@ -65,13 +56,7 @@ function MemoryGame({ initialCards }) {
         }
     }, [timer, gameOverMessage]);
 
-    /**
-     * Gestion du clic sur une carte.
-     *
-     * @param {number} index - L'index de la carte cliquée.
-     */
     function handleCardClick(index) {
-        // Sécurité pour éviter les clics hors d'une partie
         if (disabled || gameOverMessage) return;
 
         const newCards = [...cards];
@@ -90,19 +75,15 @@ function MemoryGame({ initialCards }) {
         }
     }
 
-    // Vérification si les cartes correspondent
     useEffect(() => {
         if (firstCard && secondCard) {
-            // Si les cartes correspondent
             if (firstCard.value === secondCard.value) {
                 setCards(prevCards =>
                     prevCards.map(card => (card.value === firstCard.value ? { ...card, isMatched: true } : card))
                 );
                 setMatchedPairs(prev => prev + 1);
                 resetTurn();
-                // Si elles ne correspondent pas
             } else {
-                // Animation d'échec de matching 1 sec
                 const timeoutId = setTimeout(() => {
                     setCards(prevCards =>
                         prevCards.map(card =>
@@ -114,34 +95,32 @@ function MemoryGame({ initialCards }) {
                     resetTurn();
                 }, 1000);
 
-                // Nettoyage du timeout en cas de démontage du composant
                 return () => clearTimeout(timeoutId);
             }
         }
     }, [firstCard, secondCard]);
 
-    // Fin de la partie quand toutes les paires sont trouvées
     useEffect(() => {
-        if (matchedPairs === totalPairs) {
+        if (matchedPairs === totalPairs && totalPairs > 0) {
             setGameOverMessage('Félicitations, vous avez gagné !');
             setDisabled(true);
         }
     }, [matchedPairs, totalPairs]);
 
-    /**
-     * Réinitialisation des cartes et du tour.
-     */
     function resetTurn() {
         setFirstCard(null);
         setSecondCard(null);
         setDisabled(false);
     }
 
-    /**
-     * Réinitialisation complète du jeu.
-     */
     function resetGame() {
-        setCards(generateInitialCards(initialCards));
+        if (initialCards) {
+            // Si on a fourni des cartes initiales pour les tests, on les réutilise simplement
+            setCards(shuffleCards(initialCards));
+        } else {
+            // Sinon, on régénère le jeu par défaut
+            setCards(generateInitialCards());
+        }
         setFirstCard(null);
         setSecondCard(null);
         setMatchedPairs(0);
