@@ -1,0 +1,28 @@
+.difficulty-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40vh;
+  }
+  
+  .difficulty-selector .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .difficulty-button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #333;
+    border-radius: 0.5rem;
+    background: #fff;
+    cursor: pointer;
+    transition: transform 0.1s ease-in-out;
+  }
+  
+  .difficulty-button:hover {
+    transform: scale(1.05);
+  }
+  

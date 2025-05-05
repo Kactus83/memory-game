@@ -1,9 +1,16 @@
 /* Styles des cartes */
 .card {
-    width: 100px;
-    height: 150px;
-    perspective: 1000px;
+    width: 100%;
+    aspect-ratio: 2 / 2;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border-radius: 8px;
+    background-color: #fff;
     cursor: pointer;
+    transition: transform 0.3s;
 }
 
 .card.disabled {
