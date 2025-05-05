@@ -12,15 +12,17 @@ const MASTER_VALUES = [
   '🥔','🌶️','🧄','🧅','🥬'
 ];
 
-function shuffleCards(array) {
-  const arr = array.slice();
-  for (let i = arr.length - 1; i > 0; i--) {
+// Mélange Fisher–Yates
+function shuffleCards(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  return arr;
+  return a;
 }
 
+// Duplique chaque valeur pour créer des paires
 function generateInitialCards(values) {
   let id = 1;
   const cards = values.flatMap(value => [
@@ -36,17 +38,29 @@ function generateInitialCards(values) {
  * @param {Function} props.onRequestRestart
  */
 function MemoryGame({ initialCards, difficulty, onRequestRestart }) {
-  // Génère exactement difficulty.pairs cartes
+  // Génère exactement difficulty.pairs cartes, ajoute une carte Joker si impair
   const makeCards = () => {
     if (initialCards) {
       return shuffleCards(initialCards);
     }
     const totalCards = difficulty.pairs;
-    const valuesNeeded = Math.ceil(totalCards / 2);
-    const values = MASTER_VALUES.slice(0, valuesNeeded);
+    const pairCount = Math.floor(totalCards / 2);
+    const values = MASTER_VALUES.slice(0, pairCount);
     let cards = generateInitialCards(values);
-    // Si on génère plus que besoin (paires impaires), on slice
-    return cards.slice(0, totalCards);
+
+    if (totalCards % 2 === 1) {
+      // on ajoute une carte Joker unique
+      const maxId = cards.reduce((max, c) => Math.max(max, c.id), 0);
+      cards.push({
+        id: maxId + 1,
+        value: '🃏',
+        isFlipped: false,
+        isMatched: false,
+        isJoker: true
+      });
+    }
+
+    return shuffleCards(cards);
   };
 
   const [cards, setCards] = useState(() => makeCards());
@@ -59,6 +73,7 @@ function MemoryGame({ initialCards, difficulty, onRequestRestart }) {
 
   // Nombre de colonnes = racine carrée du nombre de cartes
   const columns = Math.sqrt(cards.length);
+  const totalPairs = Math.floor(cards.length / 2);
 
   // Countdown
   useEffect(() => {
@@ -76,8 +91,18 @@ function MemoryGame({ initialCards, difficulty, onRequestRestart }) {
     const copy = [...cards];
     const card = copy[idx];
     if (card.isFlipped || card.isMatched) return;
+
+    // Joker : on le retourne et on ne lance pas la mécanique de paire
+    if (card.isJoker) {
+      card.isFlipped = true;
+      setCards(copy);
+      return;
+    }
+
+    // Cas normal : on retourne la carte
     card.isFlipped = true;
     setCards(copy);
+
     if (!firstCard) {
       setFirstCard({ ...card, idx });
     } else {
@@ -86,7 +111,7 @@ function MemoryGame({ initialCards, difficulty, onRequestRestart }) {
     }
   }
 
-  // Vérification de la paire
+  // Vérification des paires (hors Joker)
   useEffect(() => {
     if (firstCard && secondCard) {
       if (firstCard.value === secondCard.value) {
@@ -115,13 +140,13 @@ function MemoryGame({ initialCards, difficulty, onRequestRestart }) {
     }
   }, [firstCard, secondCard]);
 
-  // Victoire
+  // Victoire quand toutes les paires sont trouvées
   useEffect(() => {
-    if (matchedPairs === cards.length / 2 && cards.length > 0) {
+    if (matchedPairs === totalPairs && totalPairs > 0) {
       setGameOverMessage('Félicitations, vous avez gagné !');
       setDisabled(true);
     }
-  }, [matchedPairs, cards]);
+  }, [matchedPairs, totalPairs]);
 
   function resetTurn() {
     setFirstCard(null);
@@ -152,7 +177,7 @@ function MemoryGame({ initialCards, difficulty, onRequestRestart }) {
         resetGame={resetGame}
         onRestart={handleRestartToSelector}
         matchedPairs={matchedPairs}
-        totalPairs={cards.length / 2}
+        totalPairs={totalPairs}
       />
 
       {gameOverMessage && <GameOver message={gameOverMessage} />}

@@ -3,27 +3,27 @@ import './App.css';
 import MemoryGame from './MemoryGame';
 import DifficultySelector from './DifficultySelector';
 import { difficulties } from './difficulties';
+import { emojiSets } from './emojiSets';
 
 function App() {
-    const [mode, setMode] = useState(null);
+  // null ou { level: 'Normal', setKey: 'Fruits' }
+  const [config, setConfig] = useState(null);
 
-    function handleRestart() {
-        // Réaffiche le sélecteur de difficulté
-        setMode(null);
-    }
+  const handleRestart = () => setConfig(null);
 
-    return (
-        <div className="App">
-            {mode === null ? (
-                <DifficultySelector onSelect={setMode} />
-            ) : (
-                <MemoryGame
-                    difficulty={difficulties[mode]}
-                    onRequestRestart={handleRestart}
-                />
-            )}
-        </div>
-    );
+  return (
+    <div className="App">
+      {!config ? (
+        <DifficultySelector onSelect={setConfig} />
+      ) : (
+        <MemoryGame
+          difficulty={difficulties[config.level]}
+          emojiValues={emojiSets[config.setKey]}
+          onRequestRestart={handleRestart}
+        />
+      )}
+    </div>
+  );
 }
 
 export default App;

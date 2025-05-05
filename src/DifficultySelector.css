@@ -1,28 +1,59 @@
 .difficulty-selector {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 40vh;
-  }
-  
-  .difficulty-selector .buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  
-  .difficulty-button {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    border: 2px solid #333;
-    border-radius: 0.5rem;
-    background: #fff;
-    cursor: pointer;
-    transition: transform 0.1s ease-in-out;
-  }
-  
-  .difficulty-button:hover {
-    transform: scale(1.05);
-  }
-  
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.difficulty-selector h2 {
+  margin: 1rem 0 0.5rem;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.buttons button {
+  padding: 0.5rem 1rem;
+  border: 2px solid #333;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: 0.1s transform ease-in-out, 0.1s background;
+}
+
+.buttons button.selected {
+  background: #333;
+  color: #fff;
+}
+
+.buttons button:hover {
+  transform: scale(1.05);
+}
+
+.start-button {
+  margin-top: 1.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #28a745;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.start-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.start-button:hover:not(:disabled) {
+  opacity: 1;
+}

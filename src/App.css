@@ -1,6 +1,11 @@
 .App {
-  text-align: center;
+  display: flex;
+  flex-direction: column; /* ou enlevez si inutile */
+  align-items: center;    /* centrage horizontal */
+  justify-content: center;/* centrage vertical */
+  min-height: 100vh;      /* prend toute la hauteur de la fenêtre */
 }
+
 
 .App-logo {
   height: 40vmin;
